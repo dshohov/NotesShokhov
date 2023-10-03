@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - NotesShokhov</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/NotesShokhov.styles.css" asp-append-version="true" />
+</head>
+<body style="display: flex; flex-direction: column;  ">
+    <header class="p-2 text-bg-dark fixed-top mb-5" style="background-color:#C4C4C4;border-bottom: solid 10px #fff">
+        <div class="d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between">
+            <button id="newNoteButton" class="btn btn-sm btn-light"><span class="small">New note</span></button>
+            <form class="col-md-6">
+                <input class="w-100" placeholder="Enter search term" type="search" />
+            </form>
+            <p style="margin-right:15px" class="my-0 align-self-center">Total notes: 100</p>
+        </div>
+        
+    </header>
+    <div class="container-fluid mt-5 position-relative">
+        <main role="main" class="">
+            @RenderBody()
+        </main>
+       
+    </div>
+
+    <footer style="position: fixed; line-height: 50px; border-top: solid 10px #fff;background-color:#C4C4C4; " class="footer text-bg-dark fixed-bottom">
+
+        <div class=" d-flex flex-wrap align-items-center justify-content-center ">
+            <p class="my-0 small align-self-center">4Notes: anonymous notes sharing</p>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

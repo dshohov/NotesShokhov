@@ -1,0 +1,100 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@using NotesShokhov.ViewModels
+
+<div class="text-center">
+    <form asp-action="CreateNote" asp-controller="Home" method="post" >
+        <div id="blockNewNote" style="display:none; background-color:#C4C4C4; margin-left:30px;" class="p-2 mt-3">
+            <div class="p-2 w-100 d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between">
+                <input name="title" type="text"  placeholder="Title New Note" class="my-0 align-self-center" />
+                <div>
+                    <button type="submit" class="btn btn-sm btn-light"><span class="small">Create Note</span></button>
+                </div>
+            </div>
+            <textarea name="text" style="height:200px;" class="w-100 m-2"></textarea>
+        </div>
+    </form>
+
+ 
+@model IQueryable<Note>
+
+ 
+    <ul class="d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between mt-3">
+        @foreach(var note in Model)
+        {
+            <li style="background-color:#C4C4C4;" class="mt-3 w-100 p-2 text-bg-dark  d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between">
+                <div class="p-2 w-100 d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between">
+                    <p class="my-0 align-self-center" style="margin-left: 5%;">@note.Title</p>
+                    <p class="my-0 align-self-center">
+                        @{
+                            var timeDifference = DateTime.UtcNow - note.DateCreate;
+                            int daysDifference = (int)timeDifference.TotalDays;
+
+                            // Generating text based on the difference in days
+                            string textToShow = (daysDifference == 0) ? "Now" : $"Created {daysDifference} day{(daysDifference == 1 ? "" : "s")} ago";
+                        }
+                        @textToShow
+                    </p>
+
+                    <div>
+                        <button id="@note.Id" class="viewButton  btn btn-sm btn-light" style="width:75px; font-size:12px; margin-right:10px">
+                            <span >View note</span>
+                        </button>
+                        <button id="edit/@note.Id" class="editButton btn btn-sm btn-light"><span class="small">Edit note</span></button>
+                    </div>
+                </div>
+
+                <textarea id="textNote/@note.Id" style="display:none; height:200px;" class="w-100 m-2" >@note.Text</textarea>
+
+                
+            </li>
+        }
+
+        
+        
+
+    </ul>
+</div>
+
+
+
+@*New Note Script*@
+<script>
+    const buttonNewNote = document.getElementById('newNoteButton');
+    const blockNewNote = document.getElementById('blockNewNote');
+
+    buttonNewNote.addEventListener('click', function () {
+        // Переключаем видимость textarea
+        if (blockNewNote.style.display === 'none') {
+            blockNewNote.style.display = 'block';
+        } else {
+            blockNewNote.style.display = 'none';
+        }
+    });
+</script>
+@*View Note Script*@
+<script>
+    const buttons = document.querySelectorAll('.viewButton');
+
+    buttons.forEach(function (button) {
+        button.addEventListener('click', function () {
+            const buttonId = this.id;
+
+            ViewOrHideNote(buttonId);
+        });
+    });
+    function ViewOrHideNote(id) {
+        const textNoteTextarea = document.getElementById('textNote/' + id);
+        const viewButton = document.getElementById(id);
+        // Переключаем видимость textarea
+        if (textNoteTextarea.style.display === 'none') {
+            textNoteTextarea.style.display = 'block';
+            viewButton.textContent = 'Hide note';
+
+        } else {
+            textNoteTextarea.style.display = 'none';
+            viewButton.textContent = 'View note';
+        }
+    }
+</script>
