@@ -13,7 +13,7 @@
         <div class="d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between">
             <button id="newNoteButton" class="btn btn-sm btn-light"><span class="small">New note</span></button>
             <form class="col-md-6">
-                <input class="w-100" placeholder="Enter search term" type="search" />
+                <input class="w-100" id="searchInput" placeholder="Enter search term" type="text" />
             </form>
             <p style="margin-right:15px" class="my-0 align-self-center">Total notes: @ViewData["CountNotes"]</p>
         </div>
@@ -35,6 +35,8 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/search.js" ></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-@using NotesShokhov.ViewModels
+ 
 
 <div class="text-center">
     <form asp-action="CreateNote" asp-controller="Home" method="post">
@@ -18,12 +18,12 @@
 
     @model IQueryable<Note>
 
-    <ul class="d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between mt-3">
+    <ul class="d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between">
         @foreach (var note in Model)
         {
-            <li style="background-color:#C4C4C4;" class="mt-3 w-100 p-2 text-bg-dark  d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between">
+            <li style="display:flex; background-color:#C4C4C4;" class="note mt-3 w-100 p-2 text-bg-dark   flex-wrap align-items-center justify-content-between justify-content-lg-between">
                 <div class="p-2 w-100 d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between">
-                    <p class="my-0 align-self-center" style="width:100px ;margin-left: 5%;">@note.Title</p>
+                    <p class="myNoteTitle my-0 align-self-center" style="width:100px ;margin-left: 5%;">@note.Title</p>
                     <p class="my-0 align-self-center">
                         @{
                             var timeDifference = DateTime.UtcNow - note.DateCreate;
@@ -41,7 +41,7 @@
                     </div>
                 </div>
                 <div id="textNote/@note.Id" class="w-100 m-2" style="background-color:#fff;height: 200px; text-align:left; display:none; height:200px; overflow: auto;">
-                    <p>@note.Text</p>
+                    <p class="myNoteText">@note.Text</p>
                 </div>
                 <input style="display:none;" id="baseTitle/@note.Id" value="@note.Title" type="text" />
                 <textarea style="display:none;" id="baseText/@note.Id">@note.Text</textarea>
@@ -58,71 +58,7 @@
     </ul>
 </div>
 
-<script>
-    const buttonNewNote = document.getElementById('newNoteButton');
-    const blockNewNote = document.getElementById('blockNewNote');
 
-    buttonNewNote.addEventListener('click', function () {
-        blockNewNote.style.display = (blockNewNote.style.display === 'none') ? 'block' : 'none';
-    });
 
-    const buttons = document.querySelectorAll('.toggleButton');
-
-    buttons.forEach(function (button) {
-        button.addEventListener('click', function () {
-            const id = this.getAttribute('data-id');
-            const type = this.getAttribute('data-type');
-
-            toggleNoteVisibility(id, type);
-        });
-    });
-
-    function toggleNoteVisibility(id, type) {
-        const titleNote = document.getElementById('titleNote/' + id);
-        const confirmButton = document.getElementById('confirmButton/' + id);
-        const editTextNote = document.getElementById('editTextNote/' + id);
-        const editButton = document.querySelector(`button[data-id="${id}"][data-type="edit"]`);
-        const viewButton = document.querySelector(`button[data-id="${id}"][data-type="view"]`);
-        const textNote = document.getElementById('textNote/' + id);
-        const baseTextTextarea = document.getElementById('baseText/' + id);
-        const baseTitleInput = document.getElementById('baseTitle/' + id);
-        const formNote = document.getElementById('formNote/' + id);
-
-        if (type == 'view') {
-            if (textNote.style.display === 'block') {
-                textNote.style.display = 'none';
-                viewButton.textContent = 'View note';
-            } else {
-                textNote.style.display = 'block';
-                viewButton.textContent = 'Hide note';
-                titleNote.style.display = 'none';
-                editTextNote.style.display = 'none';
-                formNote.style.display = 'none'; // Скрываем форму редактирования
-            }
-        }
-        if (type == 'edit') {
-            if (formNote.style.display === 'block') {
-                formNote.style.display = 'none';
-                titleNote.style.display = 'none';
-                editTextNote.style.display = 'none';
-                confirmButton.style.display = 'none';
-                editButton.textContent = 'Edit note';
-            } else {
-                formNote.style.display = 'block';
-                titleNote.style.display = 'block';
-                editTextNote.style.display = 'block';
-                editButton.textContent = 'Cancel';
-                // Обработчик изменения поля textarea
-                editTextNote.addEventListener('input', function () {
-                    confirmButton.style.display = (editTextNote.value !== baseTextTextarea.value) ? 'block' : 'none';
-                });
-
-                // Обработчик изменения поля title
-                titleNote.addEventListener('input', function () {
-                    confirmButton.style.display = (titleNote.value !== baseTitleInput.value) ? 'block' : 'none';
-                });
-            }
-        }
-    }
-
-</script>
+<script src="~/js/addNewNote.js"></script>
+<script src="~/js/buttonsNoteInIndex.js"></script>
