@@ -29,13 +29,14 @@ namespace NotesShokhov.Repositories
             return saved > 0 ? true : false;
         }
 
-        public async Task<bool> UpdateAsync(Note note)
+        public async Task<bool> UpdateAsync(Note editNote)
         {
-            var existingNote = await _context.Notes.FirstOrDefaultAsync(x => x.Id == note.Id);
+            var existingNote = await _context.Notes.FirstOrDefaultAsync(x => x.Id == editNote.Id);
 
             if (existingNote != null)
             {
-                existingNote.Text = note.Text;
+                existingNote.Title = editNote.Title;
+                existingNote.Text = editNote.Text;
                 return await SaveAsync();
             }
             return false;

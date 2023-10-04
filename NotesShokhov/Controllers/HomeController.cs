@@ -20,6 +20,7 @@ namespace NotesShokhov.Controllers
         {
             var notes = await _noteRepository.GetAllNotesAsync();
             var sortNotes = notes.OrderByDescending(x => x.DateCreate);
+            ViewData["CountNotes"] = sortNotes.Count();
             return View(sortNotes);
         }
 
@@ -31,6 +32,13 @@ namespace NotesShokhov.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        public async Task<IActionResult> EditNote(int id, string title, string text)
+        {
+            var editNote = new Note() { Id = id, Title = title, Text = text};
+            await _noteRepository.UpdateAsync(editNote);
+            return RedirectToAction("Index");
+        }
 
         public IActionResult Privacy()
         {
