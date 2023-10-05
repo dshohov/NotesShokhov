@@ -1,12 +1,14 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
- 
-
+@model IQueryable<Note>
+<div class="m-2" id="updateMessage"></div>
 <div class="text-center">
+    
     <form asp-action="CreateNote" asp-controller="Home" method="post">
         <div id="blockNewNote" style="display:none; background-color:#C4C4C4; margin-left:30px;" class="p-2 mt-3">
             <div class="p-2 w-100 d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between">
+                <input name="lastId" value="@Model.Count()" style="display:none; " />
                 <input name="title" type="text" placeholder="Title New Note" class="my-0 align-self-center" />
                 <div>
                     <button type="submit" class="btn btn-sm btn-light"><span class="small">Create Note</span></button>
@@ -16,9 +18,12 @@
         </div>
     </form>
 
-    @model IQueryable<Note>
-
+    
+    <ul class="d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between" id="notes">
+        
+    </ul>
     <ul class="d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between">
+
         @foreach (var note in Model)
         {
             <li style="display:flex; background-color:#C4C4C4;" class="note mt-3 w-100 p-2 text-bg-dark   flex-wrap align-items-center justify-content-between justify-content-lg-between">
@@ -46,7 +51,7 @@
                 <input style="display:none;" id="baseTitle/@note.Id" value="@note.Title" type="text" />
                 <textarea style="display:none;" id="baseText/@note.Id">@note.Text</textarea>
                 <form asp-action="EditNote" asp-controller="Home" method="post" class="w-100 m-2" id="formNote/@note.Id" style="display:none">
-                    <input name="id" value="@note.Id" style="display:none;" />
+                    <input name="id" value="@note.Id" style=" display:none;" />
                     <input name="title" id="titleNote/@note.Id" value="@note.Title" type="text" placeholder="Title New Note" class="my-0  m-2 align-self-center" />
                     <textarea name="text" id="editTextNote/@note.Id" style=" height:200px;" class="w-100 m-2">@note.Text</textarea>
                     <button style="display:none;" id="confirmButton/@note.Id" class="toggleButton btn m-2 btn-sm btn-light" data-type="edit"><span class="small">Confirm changes</span></button>
@@ -62,3 +67,184 @@
 
 <script src="~/js/addNewNote.js"></script>
 <script src="~/js/buttonsNoteInIndex.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.11/signalr.min.js"></script>
+<div id="notes"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.11/signalr.min.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/notificationHub")
+        .build();
+
+    connection.start()
+        .then(() => {
+            console.log("SignalR connected");
+        })
+        .catch(error => {
+            console.error("SignalR connection failed: " + error);
+        });
+    const notesContainer = document.getElementById("notes");
+    
+    connection.on("ReceiveNewNote", note => {
+        // Создайте элемент для отображения заметки в виде <li>
+        const listItem = document.createElement("li");
+        listItem.style.display = "flex";
+        listItem.style.backgroundColor = "#C4C4C4";
+        listItem.classList.add("note", "mt-3", "w-100", "p-2", "text-bg-dark", "flex-wrap", "align-items-center", "justify-content-between", "justify-content-lg-between");
+
+        listItem.innerHTML = `
+            <div class="p-2 w-100 d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between">
+                <p class="myNoteTitle my-0 align-self-center" style="width:100px; margin-left: 5%;">${note.title}</p>
+                <p class="my-0 align-self-center">
+                    Created just now
+                </p>
+                <div>
+                    <button data-id="${note.id}" class="toggleButton btn btn-sm btn-light" data-type="view" style="width:75px; font-size:12px; margin-right:10px">
+                        <span>View note</span>
+                    </button>
+                        <button class="toggleButton btn btn-sm btn-light" style="visibility:hidden; width:75px; font-size:12px;" data-type="edit"><span>Edit note</span></button>
+
+                </div>
+            </div>
+            <div id="textNote/${note.id}" class="w-100 m-2" style="background-color:#fff;height: 200px; text-align:left; display:none; height:200px; overflow: auto;">
+                <p class="myNoteText">${note.text}</p>
+            </div>
+        `;
+
+        // Получите первый элемент в списке (первый дочерний элемент notesContainer)
+        const firstItem = notesContainer.firstElementChild;
+
+        // Вставьте новый элемент перед первым элементом в списке
+        notesContainer.insertBefore(listItem, firstItem);
+
+        // Добавьте обработчики событий для новых кнопок "View" и "Edit"
+        const buttons = listItem.querySelectorAll('.toggleButton');
+
+        buttons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                const id = this.getAttribute('data-id');
+                const type = this.getAttribute('data-type');
+
+                toggleNoteVisibility(id, type);
+            });
+        });
+    });
+    connection.on("ReceiveUpdateNoteMessage", message => {
+        const notificationElement = document.getElementById("updateMessage");
+        notificationElement.innerHTML =`<h5>${message}</h5>`;
+    })
+    function toggleNoteVisibility(id, type) {
+        const titleNote = document.getElementById('titleNote/' + id);
+        const confirmButton = document.getElementById('confirmButton/' + id);
+        const editTextNote = document.getElementById('editTextNote/' + id);
+        const editButton = document.querySelector(`button[data-id="${id}"][data-type="edit"]`);
+        const viewButton = document.querySelector(`button[data-id="${id}"][data-type="view"]`);
+        const textNote = document.getElementById('textNote/' + id);
+        const baseTextTextarea = document.getElementById('baseText/' + id);
+        const baseTitleInput = document.getElementById('baseTitle/' + id);
+        const formNote = document.getElementById('formNote/' + id);
+
+        if (type == 'view') {
+            if (textNote.style.display === 'block') {
+                textNote.style.display = 'none';
+                viewButton.textContent = 'View note';
+            } else {
+                textNote.style.display = 'block';
+                viewButton.textContent = 'Hide note';
+                titleNote.style.display = 'none';
+                editTextNote.style.display = 'none';
+                formNote.style.display = 'none'; // Скрываем форму редактирования
+                editButton.textContent = 'Edit note';
+            }
+        }
+        if (type == 'edit') {
+            if (formNote.style.display === 'block') {
+                formNote.style.display = 'none';
+                titleNote.style.display = 'none';
+                editTextNote.style.display = 'none';
+                confirmButton.style.display = 'none';
+                editButton.textContent = 'Edit note';
+            } else {
+                formNote.style.display = 'block';
+                titleNote.style.display = 'block';
+                editTextNote.style.display = 'block';
+                textNote.style.display = 'none';
+                editButton.textContent = 'Cancel';
+                viewButton.textContent = 'View note';
+                // Обработчик изменения поля textarea
+                editTextNote.addEventListener('input', function () {
+                    confirmButton.style.display = (editTextNote.value !== baseTextTextarea.value) ? 'block' : 'none';
+                });
+
+                // Обработчик изменения поля title
+                titleNote.addEventListener('input', function () {
+                    confirmButton.style.display = (titleNote.value !== baseTitleInput.value) ? 'block' : 'none';
+                });
+            }
+        }
+    }
+
+</script>
+@*<script>
+    const buttons = document.querySelectorAll('.toggleButton');
+
+    buttons.forEach(function (button) {
+        button.addEventListener('click', function () {
+            const id = this.getAttribute('data-id');
+            const type = this.getAttribute('data-type');
+
+            toggleNoteVisibility(id, type);
+        });
+    });
+
+    function toggleNoteVisibility(id, type) {
+        const titleNote = document.getElementById('titleNote/' + id);
+        const confirmButton = document.getElementById('confirmButton/' + id);
+        const editTextNote = document.getElementById('editTextNote/' + id);
+        const editButton = document.querySelector(`button[data-id="${id}"][data-type="edit"]`);
+        const viewButton = document.querySelector(`button[data-id="${id}"][data-type="view"]`);
+        const textNote = document.getElementById('textNote/' + id);
+        const baseTextTextarea = document.getElementById('baseText/' + id);
+        const baseTitleInput = document.getElementById('baseTitle/' + id);
+        const formNote = document.getElementById('formNote/' + id);
+
+        if (type == 'view') {
+            if (textNote.style.display === 'block') {
+                textNote.style.display = 'none';
+                viewButton.textContent = 'View note';
+            } else {
+                textNote.style.display = 'block';
+                viewButton.textContent = 'Hide note';
+                titleNote.style.display = 'none';
+                editTextNote.style.display = 'none';
+                formNote.style.display = 'none'; // Скрываем форму редактирования
+                editButton.textContent = 'Edit note';
+            }
+        }
+        if (type == 'edit') {
+            if (formNote.style.display === 'block') {
+                formNote.style.display = 'none';
+                titleNote.style.display = 'none';
+                editTextNote.style.display = 'none';
+                confirmButton.style.display = 'none';
+                editButton.textContent = 'Edit note';
+            } else {
+                formNote.style.display = 'block';
+                titleNote.style.display = 'block';
+                editTextNote.style.display = 'block';
+                textNote.style.display = 'none';
+                editButton.textContent = 'Cancel';
+                viewButton.textContent = 'View note';
+                // Обработчик изменения поля textarea
+                editTextNote.addEventListener('input', function () {
+                    confirmButton.style.display = (editTextNote.value !== baseTextTextarea.value) ? 'block' : 'none';
+                });
+
+                // Обработчик изменения поля title
+                titleNote.addEventListener('input', function () {
+                    confirmButton.style.display = (titleNote.value !== baseTitleInput.value) ? 'block' : 'none';
+                });
+            }
+        }
+    }
+</script>*@

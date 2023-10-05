@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NotesShokhov.Data;
+using NotesShokhov.Helpers;
 using NotesShokhov.Interfaces;
 using NotesShokhov.Repositories;
 
@@ -12,7 +13,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-
+builder.Services.AddSignalR();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -29,7 +30,11 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
-
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<NoteHubSignalR>("/notificationHub");
+    // Другие маршруты
+});
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

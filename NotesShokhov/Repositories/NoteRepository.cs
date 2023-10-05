@@ -28,7 +28,6 @@ namespace NotesShokhov.Repositories
             var saved = await _context.SaveChangesAsync();
             return saved > 0 ? true : false;
         }
-
         public async Task<bool> UpdateAsync(Note editNote)
         {
             var existingNote = await _context.Notes.FirstOrDefaultAsync(x => x.Id == editNote.Id);
