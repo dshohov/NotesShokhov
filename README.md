@@ -3,6 +3,8 @@ A test task whose purpose is to demonstrate my skills.
 
 
 ## Content
+- [About](#About)
+- [Architecture](#Architecture)
 - [Technologies](#Technologies)
 - [Helpers](#Helpers)
 - [Contributing](#contributing)
