@@ -9,6 +9,7 @@ namespace NotesShokhov.Data
         {
 
         }
+        //I used CodeFirst 
         public DbSet<Note> Notes { get; set; }
     }
 }

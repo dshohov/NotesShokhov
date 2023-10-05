@@ -6,14 +6,14 @@ searchInput.addEventListener('input', function () {
     listItems.forEach(function (item) {
         const titleElement = item.querySelector('.myNoteTitle');
         const textElement = item.querySelector('.myNoteText');
-        // Проверка на наличие элементов
+        // Checking for elements
         if (titleElement && textElement) {
             const title = titleElement.textContent.toLowerCase();
             const text = textElement.textContent.toLowerCase();
             const isVisible = title.includes(searchText) || text.includes(searchText);
             item.style.display = isVisible ? 'flex' : 'none';
         } else {
-            // Если элементы не найдены, скрываем элемент
+            // If no elements are found, hide the element
             item.style.display = 'none';
         }
     });

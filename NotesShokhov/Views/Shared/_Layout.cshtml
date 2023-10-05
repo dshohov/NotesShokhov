@@ -12,6 +12,7 @@
     <header class="p-2 text-bg-dark fixed-top mb-5" style="background-color:#C4C4C4;border-bottom: solid 10px #fff">
         <div class="d-flex flex-wrap align-items-center justify-content-between justify-content-lg-between">
             <button id="newNoteButton" class="btn btn-sm btn-light"><span class="small">New note</span></button>
+            @*Form for search note*@
             <form class="col-md-6">
                 <input class="w-100" id="searchInput" placeholder="Enter search term" type="text" />
             </form>
@@ -35,6 +36,11 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @*A script that searches for notes by name or text in them, 
+    without making a request to the database, 
+    but working with those already received from the database on the first request 
+    or received from SignalR*@    
     <script src="~/js/search.js" ></script>
 
     @await RenderSectionAsync("Scripts", required: false)
